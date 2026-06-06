@@ -17,3 +17,10 @@ export const notifications = [
   { id: 2, datetime: "Jun 1, 2026 08:20 AM", type: "UAV Alert", farmer: "Jhonara Fay F. Payot", coords: "8.4601° N, 124.6287° E", message: "Black Sigatoka detected at 85% confidence. Immediate action advised.", status: "Read" },
   { id: 3, datetime: "May 29, 2026 10:00 AM", type: "Resolved", farmer: "Florie Jayne A. Soler", coords: "8.4478° N, 124.6355° E", message: "Detection resolved. Follow-up UAV scan confirmed healthy status.", status: "Resolved" },
 ];
+
+export const farmInfo = {
+  name: "Talakag Banana Farm",
+  location: "Talakag, Bukidnon, Philippines",
+  totalArea: "10.0 ha",
+  crop: "Cavendish Banana",
+};

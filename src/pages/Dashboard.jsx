@@ -27,7 +27,7 @@ export default function Dashboard() {
       {/* Welcome Banner */}
       <div className="bg-forest text-white rounded-xl p-6 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Welcome back, Tiffanie! 👋</h2>
+          <h2 className="text-xl font-semibold">Welcome back, Tiffanie!</h2>
           <p className="text-white/60 text-sm mt-1">{today}</p>
         </div>
         <span className="bg-amber text-white text-sm font-medium px-4 py-1.5 rounded-full">
@@ -45,7 +45,7 @@ export default function Dashboard() {
         />
         <MetricCard
           label="Area Monitored"
-          value="10.0"
+          value="10.0 ha"
           icon={<MapPin size={18} />}
           sub="Across 4 farms"
         />
@@ -70,8 +70,20 @@ export default function Dashboard() {
           <h3 className="font-semibold text-base mb-4 text-charcoal">Latest UAV Detection</h3>
           <div className="flex gap-4">
             {/* Thumbnail placeholder */}
-            <div className="w-28 h-20 bg-forest-muted rounded-lg flex items-center justify-center shrink-0">
-              <Leaf size={32} className="text-forest opacity-50" />
+            <div className={`w-28 h-20 rounded-lg flex flex-col items-center justify-center gap-1 shrink-0 ${
+              latest.class === "Black Sigatoka" ? "bg-amber-50" : "bg-forest-muted"
+            }`}>
+              {latest.class === "Black Sigatoka" ? (
+                <>
+                  <AlertTriangle size={24} className="text-amber-500" />
+                  <span className="text-[10px] text-amber-600 font-medium">Disease</span>
+                </>
+              ) : (
+                <>
+                  <Leaf size={24} className="text-forest opacity-60" />
+                  <span className="text-[10px] text-forest font-medium">Healthy</span>
+                </>
+              )}
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
@@ -86,8 +98,9 @@ export default function Dashboard() {
               </p>
               <button
                 onClick={() => setModalDetection(latest)}
-                className="mt-1 bg-amber hover:bg-yellow-500 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition-colors"
+                className="mt-1 bg-amber hover:bg-yellow-500 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
               >
+                <Bell size={12} />
                 Send Alert
               </button>
             </div>
@@ -99,9 +112,9 @@ export default function Dashboard() {
           <h3 className="font-semibold text-base mb-4 text-charcoal">Quick Actions</h3>
           <div className="space-y-2">
             {[
-              { icon: <Plane size={16} />,      label: "Run New UAV Scan" },
-              { icon: <Megaphone size={16} />,  label: "Send Manual Notification" },
-              { icon: <FileDown size={16} />,   label: "Export Report" },
+              { icon: <Plane size={16} />,     label: "Run New UAV Scan" },
+              { icon: <Megaphone size={16} />, label: "Send Manual Notification" },
+              { icon: <FileDown size={16} />,  label: "Export Report" },
             ].map((a) => (
               <button
                 key={a.label}
