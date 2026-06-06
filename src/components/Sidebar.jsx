@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
-  LayoutDashboard, ScanLine, Map, Users, Bell, Settings
+  LayoutDashboard, ScanLine, Map, Users,
+  Bell, Settings
 } from "lucide-react";
 
 const links = [
@@ -23,7 +24,7 @@ export default function Sidebar() {
           </div>
           <div>
             <p className="text-white font-semibold text-sm leading-tight">BananaGuard AI</p>
-            <p className="text-white/50 text-xs">UAV Farm Monitor</p>
+            <p className="text-white/50 text-xs">Talakag Banana Farm</p>
           </div>
         </div>
       </div>

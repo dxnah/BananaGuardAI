@@ -1,6 +1,8 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import UAVDetections from "./pages/UAVDetections";
 import FarmMap from "./pages/FarmMap";
@@ -17,7 +19,7 @@ const pageTitles = {
   "/settings":      "Settings",
 };
 
-function Layout() {
+function Layout({ onLogout }) {
   const location = useLocation();
   const title = pageTitles[location.pathname] || "BananaGuard AI";
 
@@ -33,7 +35,8 @@ function Layout() {
             <Route path="/map"           element={<FarmMap />} />
             <Route path="/farmers"       element={<Farmers />} />
             <Route path="/notifications" element={<Notifications />} />
-            <Route path="/settings"      element={<Settings />} />
+            <Route path="/settings"      element={<Settings onLogout={onLogout} />} />
+            <Route path="*"              element={<Navigate to="/" />} />
           </Routes>
         </main>
       </div>
@@ -42,9 +45,15 @@ function Layout() {
 }
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
     <BrowserRouter>
-      <Layout />
+      {!isLoggedIn ? (
+        <Login onLogin={() => setIsLoggedIn(true)} />
+      ) : (
+        <Layout onLogout={() => setIsLoggedIn(false)} />
+      )}
     </BrowserRouter>
   );
 }
