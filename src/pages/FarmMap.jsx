@@ -43,20 +43,29 @@ export default function FarmMap() {
       <div className="flex gap-4">
         {/* Map */}
         <div className={`bg-white border border-gray-200 rounded-xl overflow-hidden transition-all ${selected ? "flex-1" : "w-full"}`}>
-          <div className="relative w-full h-[500px] bg-[#E9F5EE]">
+          <div className="relative w-full h-[500px] bg-[#E9F5EE] overflow-hidden">
+
+            {/* Aerial background image */}
+            <img
+              src="/src/assets/farm-aerial.png"
+              alt="Aerial view of Talakag Banana Farm"
+              className="absolute inset-0 w-full h-full object-cover opacity-40"
+              onError={(e) => { e.target.style.display = "none"; }}
+            />
+
+            {/* Grid + Polygons SVG */}
             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              {/* Grid */}
               <defs>
                 <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1B4332" strokeWidth="0.3" strokeOpacity="0.15" />
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1B4332" strokeWidth="0.3" strokeOpacity="0.25" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#grid)" />
 
               {/* Farm polygons */}
               {[
-                { points: "80,80 200,70 210,160 90,170",    i: 0 },
-                { points: "280,60 420,55 425,150 285,155",  i: 1 },
+                { points: "80,80 200,70 210,160 90,170",     i: 0 },
+                { points: "280,60 420,55 425,150 285,155",   i: 1 },
                 { points: "100,240 240,235 245,340 105,345", i: 2 },
                 { points: "310,230 460,225 465,330 315,335", i: 3 },
               ].map(({ points, i }) => {
@@ -67,35 +76,35 @@ export default function FarmMap() {
                     key={i}
                     points={points}
                     fill={colors.fill}
-                    fillOpacity="0.7"
+                    fillOpacity="0.75"
                     stroke={colors.stroke}
-                    strokeWidth="1.5"
+                    strokeWidth="2"
                   />
                 );
               })}
 
               {/* Zone labels */}
               {[
-                { x: 145, y: 123, i: 0 },
-                { x: 352, y: 105, i: 1 },
-                { x: 172, y: 290, i: 2 },
-                { x: 388, y: 280, i: 3 },
-              ].map(({ x, y, i }) => (
+                { x: 145, y: 123, i: 0, label: "Caburatan" },
+                { x: 352, y: 105, i: 1, label: "Payot" },
+                { x: 172, y: 290, i: 2, label: "Soler" },
+                { x: 388, y: 280, i: 3, label: "Galinada" },
+              ].map(({ x, y, i, label }) => (
                 <text
                   key={i}
                   x={x} y={y}
                   fontSize="11"
                   fill="#1B4332"
-                  fontWeight="500"
+                  fontWeight="600"
                   textAnchor="middle"
                 >
-                  {farmers[i].name.split(" ")[2] || farmers[i].name.split(" ")[0]} Zone
+                  {label}
                 </text>
               ))}
 
               {/* Coordinate labels */}
-              <text x="8"  y="492" fontSize="9" fill="#1B4332" fillOpacity="0.4">8.44°N</text>
-              <text x="8"  y="12"  fontSize="9" fill="#1B4332" fillOpacity="0.4">8.47°N</text>
+              <text x="8" y="492" fontSize="9" fill="#1B4332" fillOpacity="0.5">8.44°N</text>
+              <text x="8" y="12"  fontSize="9" fill="#1B4332" fillOpacity="0.5">8.47°N</text>
             </svg>
 
             {/* Clickable Markers */}
@@ -115,6 +124,11 @@ export default function FarmMap() {
                 />
               );
             })}
+
+            {/* Image credit */}
+            <div className="absolute bottom-2 right-2 bg-black/30 text-white text-[9px] px-2 py-0.5 rounded">
+              Placeholder Image
+            </div>
           </div>
 
           {/* Legend */}
