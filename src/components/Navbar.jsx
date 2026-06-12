@@ -13,12 +13,6 @@ export default function Navbar({ title }) {
             className="text-sm w-full focus:outline-none bg-transparent text-charcoal placeholder-gray-400"
           />
         </div>
-        <div className="relative cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Bell size={20} className="text-gray-500" />
-          <span className="absolute top-1 right-1 bg-amber w-4 h-4 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-            2
-          </span>
-        </div>
       </div>
     </header>
   );

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MetricCard from "../components/MetricCard";
 import StatusBadge from "../components/StatusBadge";
 import AlertModal from "../components/AlertModal";
-import { farmers, detections } from "../data/mockData";
+import { getDashboardSummary, getFarmers, getDetections } from "../services/api";
 import {
   ScanLine, MapPin, AlertTriangle, Bell,
   Plane, Megaphone, FileDown, Leaf
@@ -10,10 +10,21 @@ import {
 
 export default function Dashboard() {
   const [modalDetection, setModalDetection] = useState(null);
+  const [summary, setSummary]   = useState(null);
+  const [farmers, setFarmers]   = useState([]);
+  const [detections, setDetections] = useState([]);
+
   const today = new Date().toLocaleDateString("en-PH", {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   });
-  const latest = detections[0];
+
+  useEffect(() => {
+    getDashboardSummary().then(setSummary).catch(console.error);
+    getFarmers().then(setFarmers).catch(console.error);
+    getDetections().then(setDetections).catch(console.error);
+  }, []);
+
+  const latest = detections[0] || null;
 
   const statusLabel = {
     notified: "Notified",
@@ -27,11 +38,11 @@ export default function Dashboard() {
       {/* Welcome Banner */}
       <div className="bg-forest text-white rounded-xl p-6 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold">Welcome back, Tiffanie!</h2>
+          <h2 className="text-xl font-semibold">Welcome back, Admin!</h2>
           <p className="text-white/60 text-sm mt-1">{today}</p>
         </div>
         <span className="bg-amber text-white text-sm font-medium px-4 py-1.5 rounded-full">
-          2 Active Alerts
+          {summary?.active_detections ?? 0} Active Alerts
         </span>
       </div>
 
@@ -39,27 +50,27 @@ export default function Dashboard() {
       <div className="grid grid-cols-4 gap-4">
         <MetricCard
           label="UAV Scans Today"
-          value="12"
+          value={summary?.scans_today ?? "—"}
           icon={<ScanLine size={18} />}
-          sub="+3 from yesterday"
+          sub="Scans recorded today"
         />
         <MetricCard
-          label="Area Monitored"
-          value="10.0 ha"
+          label="Total Farmers"
+          value={summary?.total_farmers ?? "—"}
           icon={<MapPin size={18} />}
-          sub="Across 4 farms"
+          sub="Registered farmers"
         />
         <MetricCard
           label="Black Sigatoka"
-          value="2"
+          value={summary?.active_detections ?? "—"}
           icon={<AlertTriangle size={18} />}
           sub="Active detections"
         />
         <MetricCard
-          label="Farmers Notified"
-          value="2"
+          label="Pending Alerts"
+          value={summary?.farmers_notified ?? "—"}
           icon={<Bell size={18} />}
-          sub="This week"
+          sub="Unacknowledged alerts"
         />
       </div>
 
@@ -68,43 +79,54 @@ export default function Dashboard() {
         {/* Latest Detection */}
         <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5">
           <h3 className="font-semibold text-base mb-4 text-charcoal">Latest UAV Detection</h3>
-          <div className="flex gap-4">
-            {/* Thumbnail placeholder */}
-            <div className={`w-28 h-20 rounded-lg flex flex-col items-center justify-center gap-1 shrink-0 ${
-              latest.class === "Black Sigatoka" ? "bg-amber-50" : "bg-forest-muted"
-            }`}>
-              {latest.class === "Black Sigatoka" ? (
-                <>
-                  <AlertTriangle size={24} className="text-amber-500" />
-                  <span className="text-[10px] text-amber-600 font-medium">Disease</span>
-                </>
-              ) : (
-                <>
-                  <Leaf size={24} className="text-forest opacity-60" />
-                  <span className="text-[10px] text-forest font-medium">Healthy</span>
-                </>
-              )}
-            </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <StatusBadge status={latest.class} />
-                <span className="text-xs text-gray-400">{latest.confidence}% confidence</span>
+          {latest ? (
+            <div className="flex gap-4">
+              <div className={`w-28 h-20 rounded-lg flex flex-col items-center justify-center gap-1 shrink-0 ${
+                latest.detected_class === "Black Sigatoka" ? "bg-amber-50" : "bg-forest-muted"
+              }`}>
+                {latest.detected_class === "Black Sigatoka" ? (
+                  <>
+                    <AlertTriangle size={24} className="text-amber-500" />
+                    <span className="text-[10px] text-amber-600 font-medium">Disease</span>
+                  </>
+                ) : (
+                  <>
+                    <Leaf size={24} className="text-forest opacity-60" />
+                    <span className="text-[10px] text-forest font-medium">Healthy</span>
+                  </>
+                )}
               </div>
-              <p className="text-sm text-gray-600">
-                <span className="font-medium text-charcoal">GPS:</span> {latest.gps}
-              </p>
-              <p className="text-sm text-gray-600">
-                <span className="font-medium text-charcoal">Time:</span> {latest.datetime}
-              </p>
-              <button
-                onClick={() => setModalDetection(latest)}
-                className="mt-1 bg-amber hover:bg-yellow-500 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-              >
-                <Bell size={12} />
-                Send Alert
-              </button>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={latest.detected_class} />
+                  <span className="text-xs text-gray-400">
+                    {latest.tier2_confidence
+                      ? `${(latest.tier2_confidence * 100).toFixed(0)}% confidence`
+                      : "—"}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium text-charcoal">Detection ID:</span> #{latest.detection_id}
+                </p>
+                {latest.recommendation && (
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium text-charcoal">Note:</span> {latest.recommendation}
+                  </p>
+                )}
+                {latest.detected_class === "Black Sigatoka" && (
+                  <button
+                    onClick={() => setModalDetection(latest)}
+                    className="mt-1 bg-amber hover:bg-yellow-500 text-white text-xs font-medium px-4 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                  >
+                    <Bell size={12} />
+                    Send Alert
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="text-sm text-gray-400">No detections yet.</p>
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -136,22 +158,30 @@ export default function Dashboard() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 text-xs font-medium">
             <tr>
-              {["Farmer Name", "Farm Coordinates", "Last Notified", "Status"].map((h) => (
+              {["Farmer Name", "Farm Name", "Location", "Registered"].map((h) => (
                 <th key={h} className="text-left px-5 py-3">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {farmers.map((f) => (
-              <tr key={f.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-5 py-3 font-medium text-charcoal">{f.name}</td>
-                <td className="px-5 py-3 text-gray-500 font-mono text-xs">{f.coordinates}</td>
-                <td className="px-5 py-3 text-gray-500">{f.lastAlert}</td>
-                <td className="px-5 py-3">
-                  <StatusBadge status={statusLabel[f.status]} />
+            {farmers.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-5 py-6 text-center text-gray-400 text-xs">
+                  No farmers registered yet.
                 </td>
               </tr>
-            ))}
+            ) : (
+              farmers.map((f) => (
+                <tr key={f.user_id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-5 py-3 font-medium text-charcoal">{f.username}</td>
+                  <td className="px-5 py-3 text-gray-500">{f.farm_name || "—"}</td>
+                  <td className="px-5 py-3 text-gray-500 font-mono text-xs">{f.location || "—"}</td>
+                  <td className="px-5 py-3 text-gray-500">
+                    {f.created_at ? new Date(f.created_at).toLocaleDateString() : "—"}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

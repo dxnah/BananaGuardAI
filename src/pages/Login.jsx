@@ -1,28 +1,44 @@
 import { useState } from "react";
 import { Eye, EyeOff, Leaf, AlertCircle } from "lucide-react";
+import api from "../services/api";
 
 export default function Login({ onLogin }) {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
 
-  function handleLogin() {
+  async function handleLogin() {
     setError("");
-    if (!email || !password) {
+
+    if (!username || !password) {
       setError("Please fill in all fields.");
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      if (email === "tiffaniecupal@admin.com" && password === "adminpass") {
-        onLogin();
-      } else {
-        setError("Invalid email or password.");
-        setLoading(false);
-      }
-    }, 800);
+    try {
+      // OAuth2PasswordRequestForm expects form data, not JSON
+      const form = new URLSearchParams();
+      form.append("username", username);
+      form.append("password", password);
+
+      const { data } = await api.post("/auth/login", form, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+
+      // Store token so api.js can attach it to future requests
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
+
+      onLogin();
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Invalid username or password.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleKeyDown(e) {
@@ -53,14 +69,14 @@ export default function Login({ onLogin }) {
             </div>
           )}
 
-          {/* Email */}
+          {/* Username */}
           <div className="mb-4">
-            <label className="text-xs font-medium text-gray-500 block mb-1">Email Address</label>
+            <label className="text-xs font-medium text-gray-500 block mb-1">Username</label>
             <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               onKeyDown={handleKeyDown}
               className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest/20"
             />

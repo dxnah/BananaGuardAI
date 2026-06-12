@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { farmers } from "../data/mockData";
+import { createAlert } from "../services/api";
 
 export default function AlertModal({ detection, onClose, onSend }) {
   if (!detection) return null;
